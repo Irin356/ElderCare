@@ -219,6 +219,89 @@ describe('CareLoop End-to-End Workflow', () => {
     expect(ackEvent).toBeDefined();
   });
 
+  it('renders an empty appointment state when no appointments are available', async () => {
+    localStorage.setItem('eldercare_careloop_state_v2', JSON.stringify({ appointments: [] }));
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <DemoCaregiverLogin />
+          <CareProvider>
+            <CaregiverDashboardPage />
+          </CareProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Enter caregiver demo' }));
+    expect(screen.getByText('No appointments scheduled.')).toBeInTheDocument();
+  });
+
+  it('shows a clear fallback when an appointment has no doctor name', async () => {
+    localStorage.setItem(
+      'eldercare_careloop_state_v2',
+      JSON.stringify({
+        appointments: [
+          {
+            id: 'appointment-without-doctor',
+            specialty: 'Cardiology',
+            date: '2026-12-01',
+            time: '10:00 AM',
+            status: 'upcoming',
+          },
+        ],
+      })
+    );
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <DemoCaregiverLogin />
+          <CareProvider>
+            <CaregiverDashboardPage />
+          </CareProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Enter caregiver demo' }));
+    expect(screen.getByText('Doctor information unavailable')).toBeInTheDocument();
+    expect(screen.getByText('Cardiology')).toBeInTheDocument();
+  });
+
+  it('renders valid appointment details from CareContext', async () => {
+    localStorage.setItem(
+      'eldercare_careloop_state_v2',
+      JSON.stringify({
+        appointments: [
+          {
+            id: 'valid-appointment',
+            doctorName: 'Dr. Example',
+            specialty: 'Cardiology',
+            date: '2026-12-01',
+            time: '10:00 AM',
+            status: 'upcoming',
+          },
+        ],
+      })
+    );
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <DemoCaregiverLogin />
+          <CareProvider>
+            <CaregiverDashboardPage />
+          </CareProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Enter caregiver demo' }));
+    expect(screen.getByText('Dr. Example')).toBeInTheDocument();
+    expect(screen.getByText('Cardiology')).toBeInTheDocument();
+  });
+
   it('handles escalation to backup caregiver and prevents duplicate escalation alerts', async () => {
     let careInstance: ReturnType<typeof useCare> | null = null;
 

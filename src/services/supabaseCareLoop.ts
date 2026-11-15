@@ -96,7 +96,7 @@ interface ActivityRow {
 
 interface AppointmentRow {
   id: string;
-  doctor_name: string;
+  doctor_name: string | null;
   specialty: string | null;
   clinic: string | null;
   appointment_date: string;
@@ -395,7 +395,7 @@ export const supabaseCareLoop = {
     }));
     const appointments: Appointment[] = appointmentRows.map((appointment) => ({
       id: appointment.id,
-      doctorName: appointment.doctor_name,
+      doctorName: typeof appointment.doctor_name === 'string' ? appointment.doctor_name.trim() : '',
       specialty: appointment.specialty || '',
       clinic: appointment.clinic || '',
       date: appointment.appointment_date,

@@ -18,6 +18,7 @@ import { DoctorAppointmentsPage } from './pages/DoctorAppointmentsPage';
 import { SharedCareTimelinePage } from './pages/SharedCareTimelinePage';
 import { ProfilePage, ResetPasswordPage } from './pages/ProfilePage';
 import { UserRole } from './types';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const ProtectedRoutes: React.FC = () => {
   const { authReady, isAuthenticated } = useAuth();
@@ -36,39 +37,41 @@ const RequireRole: React.FC<{ roles: UserRole[]; children: React.ReactNode }> = 
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <CareProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<WelcomePage />} />
-              <Route path="welcome" element={<WelcomePage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="reset-password" element={<ResetPasswordPage />} />
-              <Route element={<ProtectedRoutes />}>
-                <Route
-                  path="elderly-dashboard"
-                  element={<RequireRole roles={['elderly']}><ElderlyDashboardPage /></RequireRole>}
-                />
-                <Route
-                  path="caregiver-dashboard"
-                  element={<RequireRole roles={['caregiver', 'family', 'doctor']}><CaregiverDashboardPage /></RequireRole>}
-                />
-                <Route path="medications" element={<MedicationsPage />} />
-                <Route path="care-loop" element={<CareLoopPage />} />
-                <Route path="care-circle" element={<CareCirclePage />} />
-                <Route path="voice-care" element={<VoiceCarePage />} />
-                <Route path="voice-studio" element={<FamiliarVoiceStudioPage />} />
-                <Route path="appointments" element={<DoctorAppointmentsPage />} />
-                <Route path="timeline" element={<SharedCareTimelinePage />} />
-                <Route path="profile" element={<ProfilePage />} />
+    <ErrorBoundary>
+      <AuthProvider>
+        <CareProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<WelcomePage />} />
+                <Route path="welcome" element={<WelcomePage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="reset-password" element={<ResetPasswordPage />} />
+                <Route element={<ProtectedRoutes />}>
+                  <Route
+                    path="elderly-dashboard"
+                    element={<RequireRole roles={['elderly']}><ElderlyDashboardPage /></RequireRole>}
+                  />
+                  <Route
+                    path="caregiver-dashboard"
+                    element={<RequireRole roles={['caregiver', 'family', 'doctor']}><CaregiverDashboardPage /></RequireRole>}
+                  />
+                  <Route path="medications" element={<MedicationsPage />} />
+                  <Route path="care-loop" element={<CareLoopPage />} />
+                  <Route path="care-circle" element={<CareCirclePage />} />
+                  <Route path="voice-care" element={<VoiceCarePage />} />
+                  <Route path="voice-studio" element={<FamiliarVoiceStudioPage />} />
+                  <Route path="appointments" element={<DoctorAppointmentsPage />} />
+                  <Route path="timeline" element={<SharedCareTimelinePage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                </Route>
+                <Route path="*" element={<Navigate to="/welcome" replace />} />
               </Route>
-              <Route path="*" element={<Navigate to="/welcome" replace />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </CareProvider>
-    </AuthProvider>
+            </Routes>
+          </BrowserRouter>
+        </CareProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 

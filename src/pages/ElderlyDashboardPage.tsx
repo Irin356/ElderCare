@@ -22,6 +22,7 @@ import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { useCare } from '../context/CareContext';
+import { getAppointmentDoctorLabel } from '../lib/appointments';
 
 export const ElderlyDashboardPage: React.FC = () => {
   const {
@@ -33,10 +34,13 @@ export const ElderlyDashboardPage: React.FC = () => {
     simulateUnconfirmedDose,
     followUpTasks,
     careLoop,
+    appointments,
     toggleCareLoopItem,
     setActiveVoiceAssistant,
     isDemoMode,
+    isLoading,
   } = useCare();
+  const nextAppointment = appointments.find((appointment) => appointment.status === 'upcoming');
 
   // Find medication needing attention (scheduled, snoozed, or unconfirmed)
   const currentMedication =
@@ -437,13 +441,27 @@ export const ElderlyDashboardPage: React.FC = () => {
               <Calendar className="w-5 h-5 text-sky-600" />
             </div>
 
-            <h4 className="text-lg font-black text-slate-900">Dr. Robert Chen, MD</h4>
-            <p className="text-sm text-slate-600">
-              Thursday, Nov 20 at 10:30 AM • Cardiovascular Review
-            </p>
-            <p className="text-xs text-sky-700 font-bold bg-sky-50 p-2 rounded-xl">
-              Sarah will drive and accompany you.
-            </p>
+            {isLoading ? (
+              <p role="status" className="text-sm text-slate-600">Loading appointment details…</p>
+            ) : nextAppointment ? (
+              <>
+                <h4 className="text-lg font-black text-slate-900">
+                  {getAppointmentDoctorLabel(nextAppointment.doctorName)}
+                </h4>
+                <p className="text-sm text-slate-600">
+                  {[nextAppointment.date, nextAppointment.time, nextAppointment.specialty]
+                    .filter(Boolean)
+                    .join(' • ')}
+                </p>
+                {nextAppointment.companionAssigned && (
+                  <p className="text-xs text-sky-700 font-bold bg-sky-50 p-2 rounded-xl">
+                    {nextAppointment.companionAssigned}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-slate-600">No upcoming appointments scheduled.</p>
+            )}
 
             <Link
               to="/appointments"

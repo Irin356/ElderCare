@@ -12,9 +12,10 @@ import {
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { useCare } from '../context/CareContext';
+import { getAppointmentDoctorLabel } from '../lib/appointments';
 
 export const DoctorAppointmentsPage: React.FC = () => {
-  const { appointments, addAppointment } = useCare();
+  const { appointments, addAppointment, isLoading } = useCare();
   const [showModal, setShowModal] = useState(false);
   const [doctorName, setDoctorName] = useState('');
   const [specialty, setSpecialty] = useState('');
@@ -74,6 +75,15 @@ export const DoctorAppointmentsPage: React.FC = () => {
 
       {/* Appointments Grid */}
       <div className="space-y-6">
+        {isLoading ? (
+          <p role="status" className="rounded-2xl border border-sky-200 bg-sky-50 p-6 text-sky-900">
+            Loading appointments…
+          </p>
+        ) : appointments.length === 0 ? (
+          <p className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600">
+            No appointments scheduled yet. Book an appointment to add one.
+          </p>
+        ) : null}
         {appointments.map((appt) => {
           const isUpcoming = appt.status === 'upcoming';
 
@@ -103,7 +113,7 @@ export const DoctorAppointmentsPage: React.FC = () => {
                   </div>
 
                   <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
-                    {appt.doctorName}
+                    {getAppointmentDoctorLabel(appt.doctorName)}
                   </h3>
                   <p className="text-lg font-bold text-sky-800">{appt.specialty}</p>
 

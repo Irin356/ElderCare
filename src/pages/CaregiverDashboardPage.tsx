@@ -28,6 +28,7 @@ import { Button } from '../components/common/Button';
 import { useCare } from '../context/CareContext';
 import { useAuth } from '../context/AuthContext';
 import { FollowUpResolutionType, FollowUpTask } from '../types';
+import { getAppointmentDoctorLabel } from '../lib/appointments';
 
 export const CaregiverDashboardPage: React.FC = () => {
   const {
@@ -37,6 +38,7 @@ export const CaregiverDashboardPage: React.FC = () => {
     appointments,
     careCircle,
     followUpTasks,
+    isLoading,
     simulateUnconfirmedDose,
     acknowledgeFollowUpTask,
     escalateFollowUpTask,
@@ -65,6 +67,7 @@ export const CaregiverDashboardPage: React.FC = () => {
 
   const activeFollowUps = followUpTasks.filter((t) => t.status !== 'resolved');
   const resolvedFollowUps = followUpTasks.filter((t) => t.status === 'resolved');
+  const nextAppointment = appointments[0];
 
   const handleAcknowledge = (task: FollowUpTask) => {
     acknowledgeFollowUpTask(task.id, {
@@ -606,11 +609,25 @@ export const CaregiverDashboardPage: React.FC = () => {
               <Calendar className="w-5 h-5 text-sky-600" />
             </div>
 
-            <h4 className="text-base font-black text-slate-900">{appointments[0].doctorName}</h4>
-            <p className="text-xs font-bold text-slate-500">{appointments[0].specialty}</p>
-            <p className="text-xs text-slate-600">
-              📅 {appointments[0].date} at {appointments[0].time}
-            </p>
+            {isLoading ? (
+              <p role="status" className="text-sm text-slate-600">Loading appointment details…</p>
+            ) : nextAppointment ? (
+              <>
+                <h4 className="text-base font-black text-slate-900">
+                  {getAppointmentDoctorLabel(nextAppointment.doctorName)}
+                </h4>
+                {nextAppointment.specialty && (
+                  <p className="text-xs font-bold text-slate-500">{nextAppointment.specialty}</p>
+                )}
+                {(nextAppointment.date || nextAppointment.time) && (
+                  <p className="text-xs text-slate-600">
+                    📅 {[nextAppointment.date, nextAppointment.time].filter(Boolean).join(' at ')}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-slate-600">No appointments scheduled.</p>
+            )}
 
             <div className="pt-2">
               <Link to="/appointments">
